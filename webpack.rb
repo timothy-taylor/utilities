@@ -3,6 +3,9 @@
 # creating a new instance of this class
 # will create a basic skeleton for webpack
 # with css, hmtl, image
+# uses system calls (touch, npm, git),
+# ruby methods,
+# and vim for file editing
 class SetupWebpack
   INDEX_PATH = 'src/index.js'
   INDEX =
