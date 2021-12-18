@@ -57,8 +57,7 @@ class SetupWebpack
     git_init
     add_dotenv
     create_config_file
-    system('vim -c "7 s/$/,\r\t\"watch\": \"webpack --watch\"/" -c "wq" package.json')
-    system('vim -c "8 s/$/,\r\t\"build\": \"webpack\"/" -c "wq" package.json')
+    add_npm_build_watch
   end
 
   def basic_start
@@ -99,6 +98,11 @@ class SetupWebpack
     system('touch .env')
     File.open('.env', 'w') { |file| file.write('// KEY=secret') }
     File.open('.gitignore', 'a') { |file| file.write("\n.env") }
+  end
+
+  def add_npm_build_watch
+    system('vim -c "7 s/$/,\r\t\"watch\": \"webpack --watch\"/" -c "wq" package.json')
+    system('vim -c "8 s/$/,\r\t\"build\": \"webpack\"/" -c "wq" package.json')
   end
 end
 
