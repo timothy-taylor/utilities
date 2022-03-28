@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Constants
-  INDEX_PATH = 'src/index.js'
   INDEX = <<-HTML
     import './style.css';
 
@@ -14,7 +13,6 @@ module Constants
     document.body.appendChild(component());
   HTML
 
-  WEBPACKCONFIG_PATH = 'webpack.config.js'
   WEBPACKCONFIG = <<-WEBPACK
     const path = require('path');
     const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -24,7 +22,7 @@ module Constants
       entry: './src/index.js',
       plugins: [
         new HtmlWebpackPlugin({
-          title: 'MyApp',
+          title: '---',
         }),
         new Dotenv(),
       ],
@@ -50,7 +48,11 @@ module Constants
               loader: 'babel-loader',
               options: {
                 presets: [
-                  ['@babel/preset-env', { targets: 'defaults' }]
+                  ['@babel/preset-env', {
+                    targets: 'defaults',
+                    useBuiltIns: "usage",
+                    corejs: 3
+                  }]
                 ]
               }
             }
@@ -62,13 +64,11 @@ module Constants
 
   BABELRC = <<-BABEL
     {
-      "presets": [["env", {"modules": false}]],
-
-      "plugins": ["syntax-dynamic-import"],
+      "presets": [["@babel/preset-env", {"modules": false}]],
 
       "env": {
         "test": {
-          "plugins": ["dynamic-import-node"]
+          "plugins": ["transform-es2015-modules-commonjs"]
         }
       }
     }
@@ -79,8 +79,8 @@ module Constants
       "moduleFileExtensions": ["js", "jsx"],
       "moduleDirectories": ["node_modules", "bower_components", "shared"],
       "moduleNameMapper": {
-        "\\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
-        "\\\.(css|less)$": "identity-obj-proxy"
+        "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
+        "\\.(css|less)$": "identity-obj-proxy"
       }
     }
   JSON
@@ -102,7 +102,7 @@ class SetupWebpack
     git_init
     add_dotenv
     create_config_file
-    system('npm install -D babel-loader @babel/core @babel/preset-env webpack')
+    system('npm install -D babel-loader @babel/core @babel/preset-env')
     add_npm_build_watch
     add_jest
   end
@@ -112,8 +112,7 @@ class SetupWebpack
     system('npm install webpack webpack-cli --save-dev')
     Dir.mkdir('dist')
     Dir.mkdir('src')
-    system("touch #{INDEX_PATH}")
-    File.open(INDEX_PATH, 'w') { |file| file.write(INDEX) }
+    File.open('src/index.js', 'w') { |file| file.write(INDEX) }
     replace_line_package_json
   end
 
@@ -125,24 +124,22 @@ class SetupWebpack
 
   def replace_line_package_json
     file = File.read('package.json')
-    new_content = file.gsub('"main": "index.js",', '"private": true,')
+    add_private = file.gsub('"main": "index.js",', '"private": true,')
+    new_content = add_private.sub('"echo \"Error: no test specified\" && exit 1"', '"jest"')
     File.open('package.json', 'w') { |line| line.puts new_content }
   end
 
   def create_config_file
-    system("touch #{WEBPACKCONFIG_PATH}")
-    File.open(WEBPACKCONFIG_PATH, 'w') { |file| file.write(WEBPACKCONFIG) }
+    File.open('webpack.config.js', 'w') { |file| file.write(WEBPACKCONFIG) }
   end
 
   def git_init
     system('git init')
-    system('touch .gitignore')
     File.open('.gitignore', 'w') { |file| file.write('node_modules/') }
   end
 
   def add_dotenv
     system('npm install dotenv-webpack --save-dev')
-    system('touch .env')
     File.open('.env', 'w') { |file| file.write('// KEY=secret') }
     File.open('.gitignore', 'a') { |file| file.write("\n.env") }
   end
@@ -155,15 +152,17 @@ class SetupWebpack
   def add_jest
     system('npm install --save-dev jest')
     system('npm install --save-dev identity-obj-proxy')
+    system('npm install --save core-js@3.20.0')
+    system('npm install --save-dev babel-plugin-transform-es2015-modules-commonjs')
     Dir.mkdir('__mocks__')
-    system('touch __mocks__/fileMock.js')
     filemock = "module.exports = 'test-file-stub';"
     File.open('__mocks__/fileMock.js', 'w') { |file| file.write(filemock) }
-    system('touch .babelrc')
     File.open('.babelrc', 'w') { |file| file.write(BABELRC) }
-    puts 'please update the test command to "jest" and add the following to your package.json:'
+    puts 'add the following block to your package.json file:'
     puts JESTPACKAGE
   end
 end
 
 SetupWebpack.new
+# npm install react react-dom --save
+# npm install babel-preset-react --save-dev

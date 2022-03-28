@@ -17,14 +17,13 @@ Plug 'tpope/vim-sensible'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'bfrg/vim-cpp-modern'
 Plug 'pangloss/vim-javascript'
+Plug 'leafgarland/typescript-vim'
 Plug 'MaxMEllon/vim-jsx-pretty'
 Plug 'dense-analysis/ale'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install --frozen-lockfile --production' }
 Plug 'rust-lang/rust.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-let g:coc_global_extensions = [
-  \ 'coc-tailwindcss'
-  \ ]
+let g:coc_global_extensions = ['coc-tsserver']
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
@@ -84,8 +83,8 @@ filetype plugin on
 " because lightline plug shows your status:
 set noshowmode
 
-set shiftwidth=4
-set softtabstop=4
+set shiftwidth=2
+set softtabstop=2
 set expandtab
 
 " Press ctrl-n twice to turn numbers on and off
